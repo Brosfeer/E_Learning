@@ -20,7 +20,7 @@ function submitForm() {
         address: $("#user_address").val(),
         phoneNo: $("#Phone_No").val(),
         password: $("#password").val(),
-        confirmPassword:$("#confirm_password").val()
+        confirmPassword: $("#confirm_password").val()
     };
     $.ajax({
         url: 'GetCon',
@@ -29,11 +29,11 @@ function submitForm() {
         success: function (data) {
             if (data.toString() === "Exit") {
                 document.getElementById("error-message").textContent = "E_mail not available create another one";
-            } else if(!data.null){
+            } else if (data.toString() == 'new') {
+//     alert('The name is: ' + data);
+                window.location.replace('osamapage.html');
+            } else {
                 document.getElementById("error-message").textContent = data.toString();
-            }else{
-     alert('The name is: ' + data);
-//                window.location.replace('osamapage.html');
             }
 
         },
@@ -49,7 +49,7 @@ $('#signup-form').submit(validateForm);
 //Check for the Sign In 
 function validateSigninForm(event) {
     event.preventDefault();
-    var name = document.getElementById("username").value;
+    var name = document.getElementById("email").value;
     var password = document.getElementById("password").value;
 
     if (name === null) {
@@ -64,7 +64,7 @@ function validateSigninForm(event) {
 }
 function signInForm() {
     var formData = {
-        user_name: $("#username").val(),
+        email: $("#email").val(),
         password: $("#password").val()
     };
     $.ajax({
@@ -72,12 +72,12 @@ function signInForm() {
         type: 'POST',
         data: formData,
         success: function (data) {
-            if (!data.null) {
-                alert(data.toString());
-//                window.location.replace('osamapage.html');
+            if (!data.null&&data=="success") {
+                window.location.replace('osamapage.html');
+//                alert("Data ready");
             } else if (data === "flase") {
 //                $("#error-message").textContent = "Check You Name Or Password.";
-                document.getElementById("error-message").textContent = "Check You Name or Password";
+                document.getElementById("error-message").textContent = "Check Your E_mail or Password";
 //                alert("Not Exit");
             } else {
                 alert("There is error");
@@ -89,3 +89,20 @@ function signInForm() {
     });
 }
 $("#signin-form").submit(validateSigninForm);
+
+
+
+function performAjaxRequest() {
+    $.ajax({
+        url: "Coursses",
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
+            console.log("Data received:", data);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Error: " + textStatus, errorThrown);
+        }
+    });
+}
+

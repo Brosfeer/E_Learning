@@ -12,6 +12,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @WebServlet(urlPatterns = {"/GetCon"})
 public class GetCon extends HttpServlet {
@@ -29,7 +30,7 @@ public class GetCon extends HttpServlet {
             String phone_no = request.getParameter("phoneNo").trim();
             String password = request.getParameter("password").trim();
             String confirmPassword = request.getParameter("confirmPassword").trim();
-            //ensure for receiving data
+                //ensure for receiving data
             System.out.println(name + email + password + phone_no + age);
 //            out.print(name);
 
@@ -97,13 +98,11 @@ public class GetCon extends HttpServlet {
 
             //end validation of input
             try {
+
                 // making connection to mysql DB
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                String url = "jdbc:mysql://localhost:3306/e_learning?zeroDateTimeBehavior=convertToNull&useSSL = false";
+                conn = GetConnect.getConnection();
+                
                 System.out.println("Befor inserting is fine");
-
-                conn = DriverManager.getConnection(url, "root", "root");
-
                 // Begin the transaction
                 conn.setAutoCommit(false);
 
@@ -114,8 +113,7 @@ public class GetCon extends HttpServlet {
                 ResultSet u_email = check_fo_email.executeQuery();
                 if (u_email.next()) {
                     String User_Email = u_email.getString("E_mail");
-                    System.out.println("Check for Email fine");
-                    System.out.println(User_Email);
+                    System.out.println("Check for Email fine   " + User_Email);
                     out.print("Exit");
                     return;
 
@@ -134,6 +132,10 @@ public class GetCon extends HttpServlet {
                     try (ResultSet generatedKeys = userStatement.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
                             userId = generatedKeys.getInt(1);
+                            // Create a session
+                            HttpSession session = request.getSession();
+                            // Set session attribute
+                            session.setAttribute("user_id", userId);
                         } else {
                             throw new SQLException("Failed to retrieve the generated user_id.");
                         }
@@ -144,7 +146,7 @@ public class GetCon extends HttpServlet {
                         }
                         throw e;
                     }
-                    out.print("First table fine");
+//                    out.print("First table fine");
 
                     // Insert data into 'students' table
                     String sql_students = "insert into students(user_id,age,address,phone_no) values(?,?,?,?)";
@@ -154,11 +156,11 @@ public class GetCon extends HttpServlet {
                     studentStatement.setString(3, address);
                     studentStatement.setString(4, phone_no);
                     studentStatement.executeUpdate();
-
+                    out.print("new");
                     conn.commit();
                     System.out.println("After insertion fine");
-                    out.print("insertion successfuly");
-                    response.sendRedirect("osamapage.html");
+//                    out.print("insertion successfuly");
+//                    response.sendRedirect("osamapage.html");
 
                 }
             } catch (Exception e) {

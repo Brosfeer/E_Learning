@@ -1,78 +1,66 @@
-
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @WebServlet(urlPatterns = {"/CheckSignIn"})
 public class CheckSignIn extends HttpServlet {
+
+    Connection conn = null;
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
-            String user_name = request.getParameter("user_name");
+            String email = request.getParameter("email");
             String password = request.getParameter("password");
-            System.out.println("The User Name is   " + user_name);
+            System.out.println("The E_mail Name is   " + email);
 
-            try {
-//               
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                String url = "jdbc:mysql://localhost:3306/e_learning?zeroDateTimeBehavior=convertToNull&useSSL=false";
+            conn = GetConnect.getConnection();
+            
+            String sql = "SELECT user_id FROM USERS WHERE `password`= ? AND `e_mail` =?";
 
-                Connection conn = DriverManager.getConnection(url, "root", "root");
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, password);
+            statement.setString(2, email);
+            ResultSet resultSet = statement.executeQuery();
+            
+            if (resultSet.next()) {
+                System.out.println("There Fine");
+                String user_id = resultSet.getString("user_id");
+                System.out.println("The userId  =      " + user_id);
+                // Create a session
+                HttpSession session = request.getSession();
+                // Set session attribute
+                session.setAttribute("user_id", user_id);
+                System.out.println("The Sesson is done");
+                out.print("success");
 
-                String sql = "SELECT user_id FROM USERS WHERE `password`= ? AND `User_Name` =?";
-
-                PreparedStatement statement = conn.prepareStatement(sql);
-                statement.setString(1, password);
-                statement.setString(2, user_name);
-                System.out.println(user_name);
-                ResultSet resultSet = statement.executeQuery();
-
-                if (resultSet.next()) {
-
-                    String courseSQL = "SELECT title,description from  courses ";
-                     
-                    PreparedStatement lessons = conn.prepareStatement(courseSQL);
-                    
-//                    lessons.setString(1, user_id);
-//                System.out.println(user_name);
-                    ResultSet result = lessons.executeQuery();
-                    while(result.next()){
-                        System.out.println("After Ensur of id fine");
-                        String courseTitle=result.getString("title");
-                        String description=result.getString("description");
-//                        String lessonContent=result.getString("lessons.contect");
-                        System.out.println(courseTitle);
-                        System.out.println(description);
-                    }
-                    String data = resultSet.getString("user_id");
-                    if (!data.isEmpty()) {
-                    out.print(data);
-                } else {
-                    out.print("flase");
-                }
-//                        System.out.println(data);
-//                        out.println(data);
-
-                }
-                resultSet.close();
-                statement.close();
-                conn.close();
-            } catch (Exception ex) {
             }
+            else
+                out.print("flase");
+            resultSet.close();
+            statement.close();
+            conn.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(CheckSignIn.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        doPost(request, response);
+    }
+
 }
