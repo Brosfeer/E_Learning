@@ -19,10 +19,8 @@ public class GetCon extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
         Connection conn = null;
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             String name = request.getParameter("name").trim();
             String email = request.getParameter("email").trim();
             int age = Integer.parseInt(request.getParameter("age"));
@@ -30,12 +28,8 @@ public class GetCon extends HttpServlet {
             String phone_no = request.getParameter("phoneNo").trim();
             String password = request.getParameter("password").trim();
             String confirmPassword = request.getParameter("confirmPassword").trim();
-                //ensure for receiving data
-            System.out.println(name + email + password + phone_no + age);
-//            out.print(name);
-
-            // start validation of the input
-            // Define regular expression for validation
+            //ensure for receiving data
+//            checkInput(response, name, email, password, confirmPassword, address, phone_no, age);
             String restrictedCharsAndNumbersRegex = "^[^\"*\\s0-9]*$"; // Matches any character except double quote, asterisk, space, or digit
 
             // Define regular expression for validation
@@ -45,76 +39,69 @@ public class GetCon extends HttpServlet {
             String phoneNumberRegex = "^[0-9]{10}$";
 
             // Define regular expression for validation
-            String passwordRegex = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z0-9@$!%*?&]+$";
-            // Explanation:
+            String passwordRegex = "^[a-zA-Z0-9@$!%*?&]+$";
 
             // Validate name
             boolean containsRestrictedCharsOrNumbersName = !Pattern.matches(restrictedCharsAndNumbersRegex, name);
             if (containsRestrictedCharsOrNumbersName) {
-                response.getWriter().println("Invalid name. remove other character");
+                out.println("Invalid name. remove other character");
                 return;
             }
 
             // Validate email
             boolean isValidEmail = Pattern.matches(emailRegex, email);
             if (!isValidEmail) {
-                response.getWriter().println("Invalid email address.");
+                out.print("Invalid email address.");
                 return;
             }
 
             // Validate password
             boolean isValidPassword = Pattern.matches(passwordRegex, password);
             if (!isValidPassword) {
-                response.getWriter().println("Invalid password. It should contain at least one uppercase letter, one lowercase letter, one digit, one special character, and no spaces.");
+                out.print("Invalid password. It should contain at least one letter, one digit, one special character, and no spaces.");
                 return;
             }
 
             // Validate confirm password
             boolean isConfirmPasswordMatched = password.equals(confirmPassword);
             if (!isConfirmPasswordMatched) {
-                response.getWriter().println("Passwords do not match.");
+                out.println("Passwords do not match.");
                 return;
             }
-
-            // Validate age
-//            boolean containsRestrictedCharsOrNumbersAge = !Pattern.matches(restrictedCharsAndNumbersRegex, age);
-//            if (containsRestrictedCharsOrNumbersAge) {
-//                response.getWriter().println("Invalid age. It should not contain double quotes, asterisks, spaces, or numbers.");
-//                return;
-//            }
             // Validate address
             boolean containsRestrictedCharsOrNumbersAddress = !Pattern.matches(restrictedCharsAndNumbersRegex, address);
             if (containsRestrictedCharsOrNumbersAddress) {
-                response.getWriter().println("Invalid address. It should not contain number or other character.");
+                out.print("Invalid address. It should not contain number or other character.");
                 return;
             }
 
             // Validate phone number
             boolean containsphoneNumberRegex = !Pattern.matches(phoneNumberRegex, phone_no);
             if (containsphoneNumberRegex) {
-                response.getWriter().println("Invalid phone number. It should contain only number");
+                out.print("Invalid phone number. It should contain only number");
                 return;
             }
-
             //end validation of input
             try {
 
                 // making connection to mysql DB
                 conn = GetConnect.getConnection();
-                
+
                 System.out.println("Befor inserting is fine");
                 // Begin the transaction
                 conn.setAutoCommit(false);
 
                 // Create a statement object
-                String email_check = "select e_mail from USERS where e_mail=?;";
+                String email_check = "select password from USERS where e_mail=?;";
                 PreparedStatement check_fo_email = conn.prepareStatement(email_check);
                 check_fo_email.setString(1, email);
                 ResultSet u_email = check_fo_email.executeQuery();
                 if (u_email.next()) {
-                    String User_Email = u_email.getString("E_mail");
+                    String User_Email = u_email.getString("password");
                     System.out.println("Check for Email fine   " + User_Email);
-                    out.print("Exit");
+                    PrintWriter outer = response.getWriter();
+                    outer.print("Exit");
+                    System.out.println("The request and query is fine");
                     return;
 
                 } else {
@@ -134,8 +121,8 @@ public class GetCon extends HttpServlet {
                             userId = generatedKeys.getInt(1);
                             // Create a session
                             HttpSession session = request.getSession();
-                            // Set session attribute
-                            session.setAttribute("user_id", userId);
+                            session.setAttribute("user_is", userId);
+//                            buildSession(request, email);
                         } else {
                             throw new SQLException("Failed to retrieve the generated user_id.");
                         }
@@ -185,5 +172,73 @@ public class GetCon extends HttpServlet {
                 }
             }
         }
+    }
+
+    void checkInput(HttpServletResponse response, String name, String email, String pass, String passCon, String address, String phone, int age) {
+        try (PrintWriter out = response.getWriter()) {
+            // Define regular expression for validation
+            String restrictedCharsAndNumbersRegex = "^[^\"*\\s0-9]*$"; // Matches any character except double quote, asterisk, space, or digit
+
+            // Define regular expression for validation
+            String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+
+            // Matches exactly 10 digits (adjust as per your phone number format)
+            String phoneNumberRegex = "^[0-9]{10}$";
+
+            // Define regular expression for validation
+            String passwordRegex = "^[a-zA-Z0-9@$!%*?&]+$";
+
+            // Validate name
+            boolean containsRestrictedCharsOrNumbersName = !Pattern.matches(restrictedCharsAndNumbersRegex, name);
+            if (containsRestrictedCharsOrNumbersName) {
+                out.println("Invalid name. remove other character");
+                return;
+            }
+
+            // Validate email
+            boolean isValidEmail = Pattern.matches(emailRegex, email);
+            if (!isValidEmail) {
+                out.print("Invalid email address.");
+                return;
+            }
+
+            // Validate password
+            boolean isValidPassword = Pattern.matches(passwordRegex, pass);
+            if (!isValidPassword) {
+                out.print("Invalid password. It should contain at least one letter, one digit, one special character, and no spaces.");
+                return;
+            }
+
+            // Validate confirm password
+            boolean isConfirmPasswordMatched = pass.equals(passCon);
+            if (!isConfirmPasswordMatched) {
+                out.println("Passwords do not match.");
+                return;
+            }
+            // Validate address
+            boolean containsRestrictedCharsOrNumbersAddress = !Pattern.matches(restrictedCharsAndNumbersRegex, address);
+            if (containsRestrictedCharsOrNumbersAddress) {
+                out.print("Invalid address. It should not contain number or other character.");
+                return;
+            }
+
+            // Validate phone number
+            boolean containsphoneNumberRegex = !Pattern.matches(phoneNumberRegex, phone);
+            if (containsphoneNumberRegex) {
+                out.print("Invalid phone number. It should contain only number");
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("The error  " + e.getMessage());
+        }
+    }
+
+    boolean isExist() {
+        return true;
+    }
+
+    void buildSession(HttpServletRequest request, String user_id) {
+        HttpSession session = request.getSession();
+        session.setAttribute("user_is", user_id);
     }
 }

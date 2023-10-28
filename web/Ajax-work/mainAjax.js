@@ -1,3 +1,8 @@
+$('#signup-form').submit(validateForm);
+$("#signin-form").submit(validateSigninForm);
+
+
+
 function validateForm(event) {
     event.preventDefault();
 
@@ -27,15 +32,15 @@ function submitForm() {
         type: 'POST',
         data: formData,
         success: function (data) {
-            if (data.toString() === "Exit") {
-                document.getElementById("error-message").textContent = "E_mail not available create another one";
+            if (data==="Exit") {
+//                 alert("The Message   "+data);
+                $("#error-message").html("E_mail not available create another one");
             } else if (data.toString() == 'new') {
 //     alert('The name is: ' + data);
-                window.location.replace('osamapage.html');
+                $(".parent").load("osamapage.html");
             } else {
-                document.getElementById("error-message").textContent = data.toString();
+                $("#error-message").html( data.toString());
             }
-
         },
         error: function () {
             alert('Error');
@@ -43,7 +48,7 @@ function submitForm() {
     });
 }
 
-$('#signup-form').submit(validateForm);
+
 
 
 //Check for the Sign In 
@@ -72,15 +77,19 @@ function signInForm() {
         type: 'POST',
         data: formData,
         success: function (data) {
-            if (!data.null&&data=="success") {
-                window.location.replace('osamapage.html');
+            if (!data.null && data.length !== 0) {
+                if (!data.null && data == "success") {
+                    $("#parent").load("osamapage.html");
+//                    document.getElementById("parent").innerHTML = "osamapage.html";
+//                    window.location.replace('osamapage.html');
 //                alert("Data ready");
-            } else if (data === "flase") {
-//                $("#error-message").textContent = "Check You Name Or Password.";
-                document.getElementById("error-message").textContent = "Check Your E_mail or Password";
-//                alert("Not Exit");
-            } else {
-                alert("There is error");
+                } else if (data === "flase") {
+                    $("#error-message").textContent = "Check You Name Or Password.";
+                    window.location.replace('SignUp.html');
+                    alert("Not Exit");
+                } else {
+                    document.getElementById("error-message").textContent = data.toString();
+                }
             }
         },
         error: function () {
@@ -88,21 +97,3 @@ function signInForm() {
         }
     });
 }
-$("#signin-form").submit(validateSigninForm);
-
-
-
-function performAjaxRequest() {
-    $.ajax({
-        url: "Coursses",
-        type: "GET",
-        dataType: "json",
-        success: function (data) {
-            console.log("Data received:", data);
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            console.error("Error: " + textStatus, errorThrown);
-        }
-    });
-}
-

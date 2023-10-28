@@ -37,12 +37,9 @@ public class Coursses extends HttpServlet {
 
             connection = GetConnect.getConnection();
 
-            String sql = "select course_id from course_progress where user_id =?";
-            PreparedStatement state = connection.prepareStatement(sql);
-            state.setString(1, user_id);
-            ResultSet result = state.executeQuery();
+            boolean isInProgress = checkCourseInProgress(user_id);
 
-            if (result.next()) {
+            if (isInProgress) {
                 System.out.println("there is course in progress");
                 String getData = "select*from coursesProfileDetails where user_id=?";
 
@@ -62,12 +59,14 @@ public class Coursses extends HttpServlet {
                     }
                     String User_Name = resultSet.getString("User_Name");
                     String E_mail = resultSet.getString("E_mail");
+                    String courseId = resultSet.getString("course_id");
                     String coursseDiscription = resultSet.getString("Description");
                     String teacher_name = resultSet.getString("teacher_name");
                     String Courssetitle = resultSet.getString("title");
                     String coursseDuration = resultSet.getString("Duration");
                     jsonData.append("{\"User_Name\":\"").append(User_Name).append("\",");
-                    jsonData.append("{\"E_mail\":\"").append(E_mail).append("\",");
+                    jsonData.append("\"E_mail\":\"").append(E_mail).append("\",");
+                    jsonData.append("\"courseId\":\"").append(courseId).append("\",");
                     jsonData.append("\"teacher_name\":\"").append(teacher_name).append("\",");
                     jsonData.append("\"Courssetitle\":\"").append(Courssetitle).append("\",");
                     jsonData.append("\"coursseDiscription\":\"").append(coursseDiscription).append("\",");
@@ -77,40 +76,51 @@ public class Coursses extends HttpServlet {
                 }
 
                 jsonData.append("]}");
-                String getDataInSinged = "select*from coursesProfileDetails where user_id=?";
+                
+                
+                String getRest = "SELECT co.course_id,co.title, co.description, co.duration, ins.teacher_name \n"
+                        + "FROM courses co \n"
+                        + "LEFT JOIN course_progress pro ON co.course_id = pro.course_id AND pro.user_id =?\n"
+                        + "INNER JOIN instructors ins USING (instructor_id) \n"
+                        + "WHERE pro.course_id IS NULL";
 
-                PreparedStatement query = connection.prepareStatement(getDataInSinged);
-                query.setString(1, user_id);
-                ResultSet res = query.executeQuery();
+                PreparedStatement statem = connection.prepareStatement(getRest);
+                statem.setString(1, user_id);
+                ResultSet resultRes = statem.executeQuery();
                 System.out.println("Ther SQL Comand fine");
 
-                StringBuilder jsonDataInSigned = new StringBuilder();
+                StringBuilder jsonRestData = new StringBuilder();
 
-                jsonDataInSigned.append("{\"data of in signed\": [");
+                jsonRestData.append(",{\"Restdata\": [");
                 System.out.println("There is Fine");
-                boolean isFirstR = true;
-                while (res.next()) {
-                    if (!isFirstR) {
-                        jsonDataInSigned.append(",");
+                boolean isFirstRo = true;
+                while (resultRes.next()) {
+                    if (!isFirstRo) {
+                        jsonRestData.append(",");
                     }
 //                    String User_Name = resultSet.getString("User_Name");
 //                    String E_mail = resultSet.getString("E_mail");
-                    String coursseDisc = res.getString("Description");
-                    String teach_name = res.getString("teacher_name");
-                    String Cotitle = res.getString("title");
-                    String coDuration = res.getString("Duration");
+                    String courseId = resultRes.getString("course_id");
+                    String coursseDiscription = resultRes.getString("Description");
+                    String teacher_name = resultRes.getString("teacher_name");
+                    String Courssetitle = resultRes.getString("title");
+                    String coursseDuration = resultRes.getString("Duration");
 //                    jsonData.append("{\"User_Name\":\"").append(User_Name).append("\",");
-//                    jsonData.append("{\"E_mail\":\"").append(E_mail).append("\",");
-                    jsonDataInSigned.append("\"teach_name\":\"").append(teach_name).append("\",");
-                    jsonDataInSigned.append("\"CoTitle\":\"").append(Cotitle).append("\",");
-                    jsonDataInSigned.append("\"coDiscription\":\"").append(coursseDisc).append("\",");
-                    jsonDataInSigned.append("\"coDuration\":\"").append(coDuration).append("\"}");
+//                    jsonData.append("\"E_mail\":\"").append(E_mail).append("\",");
+                    jsonRestData.append("{\"courseId\":\"").append(courseId).append("\",");
+                    jsonRestData.append("\"teacher_name\":\"").append(teacher_name).append("\",");
+                    jsonRestData.append("\"Courssetitle\":\"").append(Courssetitle).append("\",");
+                    jsonRestData.append("\"coursseDiscription\":\"").append(coursseDiscription).append("\",");
+                    jsonRestData.append("\"coursseDuration\":\"").append(coursseDuration).append("\"}");
 
-                    isFirstR = false;
+                    isFirstRo = false;
                 }
 
-                jsonDataInSigned.append("]}");
-                jsonData.append(jsonDataInSigned);
+                jsonRestData.append("]}");
+
+//                StringBuilder returnData=new StringBuilder();
+//                returnData.append(jsonData);
+//                returnData.append(jsonRestData);
 
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
@@ -118,8 +128,7 @@ public class Coursses extends HttpServlet {
                 System.out.println("the Data    " + jsonData.toString());
             } else {
                 System.out.println("There is no one ");
-                String getData = "select us.User_Name, us.E_mail,co.title,"
-                        + "co.Description,co.Duration,ins.teacher_name FROM courses co inner join instructors ins using(instructor_id) inner join users us where us.user_id=? ";
+                String getData = "select*from courseOfNewUser where user_id= ? ";
 
                 PreparedStatement statement = connection.prepareStatement(getData);
                 statement.setString(1, user_id);
@@ -127,7 +136,7 @@ public class Coursses extends HttpServlet {
 
                 StringBuilder jsonData = new StringBuilder();
 
-                jsonData.append("{\"data\": [");
+                jsonData.append("{\"data2\": [");
                 boolean isFirstRow = true;
                 while (resultSet.next()) {
                     if (!isFirstRow) {
@@ -135,12 +144,14 @@ public class Coursses extends HttpServlet {
                     }
                     String User_Name = resultSet.getString("User_Name");
                     String E_mail = resultSet.getString("E_mail");
+                    String courseId = resultSet.getString("course_id");
                     String coursseDiscription = resultSet.getString("Description");
                     String teacher_name = resultSet.getString("teacher_name");
                     String Courssetitle = resultSet.getString("title");
                     String coursseDuration = resultSet.getString("Duration");
                     jsonData.append("{\"User_Name\":\"").append(User_Name).append("\",");
-                    jsonData.append("{\"E_mail\":\"").append(E_mail).append("\",");
+                    jsonData.append("\"E_mail\":\"").append(E_mail).append("\",");
+                    jsonData.append("\"courseId\":\"").append(courseId).append("\",");
                     jsonData.append("\"teacher_name\":\"").append(teacher_name).append("\",");
                     jsonData.append("\"Courssetitle\":\"").append(Courssetitle).append("\",");
                     jsonData.append("\"coursseDiscription\":\"").append(coursseDiscription).append("\",");
@@ -156,17 +167,28 @@ public class Coursses extends HttpServlet {
                 out.print(jsonData.toString());
                 System.out.println("Courses Not in Progress table       ");
                 System.out.println("the Data    " + jsonData.toString());
-                
-//                out.print("");
+
             }
 
-//                }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
+
+    boolean checkCourseInProgress(String user_id) throws SQLException {
+        String sql = "select course_id from course_progress where user_id =?";
+        PreparedStatement state = connection.prepareStatement(sql);
+        state.setString(1, user_id);
+        ResultSet result = state.executeQuery();
+        if (result.next()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 //}
 // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -192,12 +214,4 @@ public class Coursses extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-    public static String getSession(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession();
-
-        // Set session attribute
-        String user_id = (String) session.getAttribute("user_id");
-        System.out.println("The User id   " + user_id);
-        return user_id;
-    }
 }
