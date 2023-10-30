@@ -115,13 +115,15 @@ public class GetCon extends HttpServlet {
                     userStatement.executeUpdate();
 
                     // Retrieve the generated user_id value
-                    int userId;
+                    String userId;
                     try (ResultSet generatedKeys = userStatement.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
-                            userId = generatedKeys.getInt(1);
+                            userId = generatedKeys.getString(1);
+                            System.out.println("The User Id From the GetCon Servlet  "+userId);
                             // Create a session
                             HttpSession session = request.getSession();
-                            session.setAttribute("user_is", userId);
+                            session.setAttribute("user_id", userId);
+                            System.out.println(userId);
 //                            buildSession(request, email);
                         } else {
                             throw new SQLException("Failed to retrieve the generated user_id.");
@@ -138,7 +140,7 @@ public class GetCon extends HttpServlet {
                     // Insert data into 'students' table
                     String sql_students = "insert into students(user_id,age,address,phone_no) values(?,?,?,?)";
                     PreparedStatement studentStatement = conn.prepareStatement(sql_students);
-                    studentStatement.setInt(1, userId);
+                    studentStatement.setString(1, userId);
                     studentStatement.setInt(2, age);
                     studentStatement.setString(3, address);
                     studentStatement.setString(4, phone_no);

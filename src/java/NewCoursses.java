@@ -1,3 +1,4 @@
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -10,13 +11,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-
 @WebServlet(urlPatterns = {"/NewCoursses"})
 public class NewCoursses extends HttpServlet {
 
-        Connection connection = null;
+    Connection connection = null;
 
-   protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
@@ -30,99 +30,48 @@ public class NewCoursses extends HttpServlet {
 
             connection = GetConnect.getConnection();
 
-            String sql = "select course_id from course_progress where user_id =?";
-            PreparedStatement state = connection.prepareStatement(sql);
-            state.setString(1, user_id);
-            ResultSet result = state.executeQuery();
+            System.out.println("There is no one ");
+            String getData = "select*from courseOfNewUser where user_id= ? ";
 
-            if (result.next()) {
-                System.out.println("there is course in progress");
-                String getData = "select*from coursesProfileDetails where user_id=?";
+            PreparedStatement statement = connection.prepareStatement(getData);
+            statement.setString(1, user_id);
+            ResultSet resultSet = statement.executeQuery();
 
-                PreparedStatement statement = connection.prepareStatement(getData);
-                statement.setString(1, user_id);
-                ResultSet resultSet = statement.executeQuery();
-                System.out.println("Ther SQL Comand fine");
+            StringBuilder jsonData = new StringBuilder();
 
-//                StringBuilder jsonData = new StringBuilder();
-//
-//                jsonData.append("{\"data\": [");
-//                System.out.println("There is Fine");
-//                boolean isFirstRow = true;
-//                while (resultSet.next()) {
-//                    if (!isFirstRow) {
-//                        jsonData.append(",");
-//                    }
-//                    String User_Name = resultSet.getString("User_Name");
-//                    String E_mail = resultSet.getString("E_mail");
-//                    String coursseDiscription = resultSet.getString("Description");
-//                    String teacher_name = resultSet.getString("teacher_name");
-//                    String Courssetitle = resultSet.getString("title");
-//                    String coursseDuration = resultSet.getString("Duration");
-//                    jsonData.append("{\"User_Name\":\"").append(User_Name).append("\",");
-//                    jsonData.append("\"E_mail\":\"").append(E_mail).append("\",");
-//                    jsonData.append("\"teacher_name\":\"").append(teacher_name).append("\",");
-//                    jsonData.append("\"Courssetitle\":\"").append(Courssetitle).append("\",");
-//                    jsonData.append("\"coursseDiscription\":\"").append(coursseDiscription).append("\",");
-//                    jsonData.append("\"coursseDuration\":\"").append(coursseDuration).append("\"}");
-//
-//                    isFirstRow = false;
-//                }
-//
-//                jsonData.append("]}");
-////                
-//                
-                String getDataInSinged = "SELECT co.course_id,co.title, co.description, co.duration, ins.teacher_name\n"
-                        + "FROM courses co\n"
-                        + "LEFT JOIN course_progress pro ON co.course_id = pro.course_id AND pro.user_id =?\n"
-                        + "INNER JOIN instructors ins USING (instructor_id)\n"
-                        + "WHERE pro.course_id IS NULL";
-
-                PreparedStatement query = connection.prepareStatement(getDataInSinged);
-                query.setString(1, user_id);
-                ResultSet res = query.executeQuery();
-                System.out.println("Ther SQL Comand fine");
-
-                StringBuilder jsonDataInSigned = new StringBuilder();
-
-                jsonDataInSigned.append("{\"data2\": [");
-                System.out.println("There is Fine");
-                boolean isFirstR = true;
-                while (res.next()) {
-                    if (!isFirstR) {
-                        jsonDataInSigned.append(",");
-                    }
-
-                    String Description = res.getString("Description");
-                    String newteacher_name = res.getString("teacher_name");
-                    String title = res.getString("title");
-                    String Duration = res.getString("Duration");
-
-                    jsonDataInSigned.append("{\"newteacher_name\":\"").append(newteacher_name).append("\",");
-                    jsonDataInSigned.append("\"title\":\"").append(title).append("\",");
-                    jsonDataInSigned.append("\"Description\":\"").append(Description).append("\",");
-                    jsonDataInSigned.append("\"Duration\":\"").append(Duration).append("\"}");
-
-                    isFirstR = false;
+            jsonData.append("{\"data\": [");
+            boolean isFirstRow = true;
+            while (resultSet.next()) {
+                if (!isFirstRow) {
+                    jsonData.append(",");
                 }
+                String User_Name = resultSet.getString("User_Name");
+                String E_mail = resultSet.getString("E_mail");
+                String courseId = resultSet.getString("course_id");
+                String courseImg = resultSet.getString("courseImg");
+                String coursseDiscription = resultSet.getString("Description");
+                String teacher_name = resultSet.getString("teacher_name");
+                String Courssetitle = resultSet.getString("title");
+                String coursseDuration = resultSet.getString("Duration");
+                jsonData.append("{\"User_Name\":\"").append(User_Name).append("\",");
+                jsonData.append("\"E_mail\":\"").append(E_mail).append("\",");
+                jsonData.append("\"courseId\":\"").append(courseId).append("\",");
+                jsonData.append("\"courseImg\":\"").append(courseImg).append("\",");
+                jsonData.append("\"teacher_name\":\"").append(teacher_name).append("\",");
+                jsonData.append("\"Courssetitle\":\"").append(Courssetitle).append("\",");
+                jsonData.append("\"coursseDiscription\":\"").append(coursseDiscription).append("\",");
+                jsonData.append("\"coursseDuration\":\"").append(coursseDuration).append("\"}");
 
-                jsonDataInSigned.append("]}");
-
-                response.setContentType("application/json");
-                response.setCharacterEncoding("UTF-8");
-                out.print(jsonDataInSigned.toString());
-                System.out.println("the Data    " + jsonDataInSigned.toString());
-            } else {
-                System.out.println("There is no one ");
-                String getData = "select us.User_Name, us.E_mail,co.title,"
-                        + "co.Description,co.Duration,ins.teacher_name FROM courses co inner join instructors ins using(instructor_id) inner join users us where us.user_id=? ";
-
-                PreparedStatement statement = connection.prepareStatement(getData);
-                statement.setString(1, user_id);
-                ResultSet resultSet = statement.executeQuery();
-
-               
+                isFirstRow = false;
             }
+
+            jsonData.append("]}");
+
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            out.print(jsonData.toString());
+            System.out.println("Courses Not in Progress table       ");
+            System.out.println("the Data    " + jsonData.toString());
 
         } catch (Exception ex) {
             ex.printStackTrace();

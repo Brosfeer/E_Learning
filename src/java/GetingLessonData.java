@@ -57,11 +57,7 @@ public class GetingLessonData extends HttpServlet {
                 
                 
 
-                String sql = "select co.title as CourseTitle,co.description as courseDescription\n"
-                        + ",co.duration as CourseDuration,les.title as LessonTitle,les.content as LessonContent\n"
-                        + ",les.video_url as LessonVideoURL,ins.teacher_name as TeacherName\n"
-                        + "from lessons les inner join courses co using(course_id) \n"
-                        + "inner join instructors ins using(instructor_id) where course_id=? ";
+                String sql = " select * from lessonDetails where course_id=? ";
                 int course_Id = Integer.parseInt(courseId);
                 statement = connection.prepareStatement(sql);
 //                statement.setInt(1, '1');
@@ -178,7 +174,7 @@ class Lesson {
         this.courseDuration = courseDuration;
         this.lessonTitle = lessonTitle;
         this.lessonContent = lessonContent;
-        this.videoUrl = "https://youtu.be/ItZN6o0ylao?si=FYwcFrYFvt4MGmN7";
+        this.videoUrl = videoUrl;
         this.teacherName = teacherName;
     }
 }

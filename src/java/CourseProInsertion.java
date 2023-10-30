@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -34,20 +35,33 @@ public class CourseProInsertion extends HttpServlet {
             System.out.println("The User Id   from CourseProInsertion  Servlet     " + user_id);
             // Set session attribute
             session.setAttribute("course_id", courseId);
-            
-            System.out.println("Session creaation fine");
 
-//            String sql = "insert into course_progress(user_id,course_id) values(?,?)";
-//            statement = connection.prepareStatement(sql);
-//            statement.setInt(1, user_id);
-//            statement.setInt(2, courseId);
-//            statement.executeUpdate();
-//            System.out.println("insertion fine             0_0");
+            System.out.println("Session creaation fine");
+            connection = GetConnect.getConnection();
+            
+            if(!checkCoursePro(user_id));
+            String sql = "insert into course_progress(course_id,user_id) values(?,?)";
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, courseId);
+            statement.setInt(2, user_id);
+            System.out.println("insert statement fine");
+            statement.executeUpdate();
+            System.out.println("insertion fine             0_0");
             out.print("success");
+             
         } catch (Exception e) {
-            System.out.println("The Error  " + e.getMessage());
+            e.printStackTrace();
         }
 
+    }
+
+    boolean checkCoursePro(int user_id) throws SQLException {
+        String sql = "select course_id from course_progress where user_id=?";
+        statement = connection.prepareStatement(sql);
+        statement.setInt(1, user_id);
+        System.out.println("course is already in");
+        resultSet = statement.executeQuery();
+        return resultSet.next();
     }
 
 // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

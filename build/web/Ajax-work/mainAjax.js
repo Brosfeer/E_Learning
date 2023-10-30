@@ -32,14 +32,19 @@ function submitForm() {
         type: 'POST',
         data: formData,
         success: function (data) {
-            if (data==="Exit") {
+//            alert("The responese    " + data);
+            if (data === "Exit") {
 //                 alert("The Message   "+data);
                 $("#error-message").html("E_mail not available create another one");
-            } else if (data.toString() == 'new') {
-//     alert('The name is: ' + data);
-                $(".parent").load("osamapage.html");
+            } else if (data === "new") {
+//                alert('The name is: ' + data);
+                $("#parent").load("osamapage.html");
+                
             } else {
-                $("#error-message").html( data.toString());
+//                alert('The name is: ' + data);
+                $("#error-message").html(data.toString());
+//                $("#parent").load("osamapage.html");
+//                window.location.href = "osamapage.html";
             }
         },
         error: function () {
