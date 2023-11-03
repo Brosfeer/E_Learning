@@ -39,7 +39,7 @@ function submitForm() {
             } else if (data === "new") {
 //                alert('The name is: ' + data);
                 $("#parent").load("osamapage.html");
-                
+
             } else {
 //                alert('The name is: ' + data);
                 $("#error-message").html(data.toString());
@@ -77,6 +77,8 @@ function signInForm() {
         email: $("#email").val(),
         password: $("#password").val()
     };
+
+    // ajax request for checking email and pass if hava account
     $.ajax({
         url: 'CheckSignIn',
         type: 'POST',
@@ -86,12 +88,11 @@ function signInForm() {
                 if (!data.null && data == "success") {
                     $("#parent").load("osamapage.html");
 //                    document.getElementById("parent").innerHTML = "osamapage.html";
-//                    window.location.replace('osamapage.html');
 //                alert("Data ready");
                 } else if (data === "flase") {
                     $("#error-message").textContent = "Check You Name Or Password.";
-                    window.location.replace('SignUp.html');
-                    alert("Not Exit");
+                    $("#parent").load("SignUp.html");
+                    alert("Do not have account");
                 } else {
                     document.getElementById("error-message").textContent = data.toString();
                 }

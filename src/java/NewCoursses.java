@@ -104,13 +104,4 @@ public class NewCoursses extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
-    public static String getSession(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession();
-
-        // Set session attribute
-        String user_id = (String) session.getAttribute("user_id");
-        System.out.println("The User id   " + user_id);
-        return user_id;
-    }
 }

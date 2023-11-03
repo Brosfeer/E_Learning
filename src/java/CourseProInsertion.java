@@ -38,17 +38,18 @@ public class CourseProInsertion extends HttpServlet {
 
             System.out.println("Session creaation fine");
             connection = GetConnect.getConnection();
-            
-            if(!checkCoursePro(user_id));
-            String sql = "insert into course_progress(course_id,user_id) values(?,?)";
-            statement = connection.prepareStatement(sql);
-            statement.setInt(1, courseId);
-            statement.setInt(2, user_id);
-            System.out.println("insert statement fine");
-            statement.executeUpdate();
-            System.out.println("insertion fine             0_0");
-            out.print("success");
-             
+
+            if (!checkCoursePro(user_id)) {
+                String sql = "insert into course_progress(course_id,user_id) values(?,?)";
+                statement = connection.prepareStatement(sql);
+                statement.setInt(1, courseId);
+                statement.setInt(2, user_id);
+                System.out.println("insert statement fine");
+                statement.executeUpdate();
+                System.out.println("insertion fine             0_0");
+                out.print("success");
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

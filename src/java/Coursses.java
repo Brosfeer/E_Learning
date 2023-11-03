@@ -30,9 +30,9 @@ public class Coursses extends HttpServlet {
             HttpSession session = request.getSession();
 
             // Set session attribute
-            String user_id = (String) session.getAttribute("user_id");
+//            String user_id = (String) session.getAttribute("user_id");
 
-//            String user_id = "105";
+            String user_id = "105";
             System.out.println("The user id from Coursses servlet " + user_id);
 //            String user_id = getSession(request, response);
 
